@@ -3,8 +3,8 @@
   "packagerNgrokUrl": "https://packager.f3-qah.anonymous.battleship.exp.direct",
   "ngrokPid": 5516,
   "devToolsPort": 19002,
-  "expoServerPort": 19000,
-  "packagerPort": 19001,
-  "packagerPid": 12876,
+  "expoServerPort": null,
+  "packagerPort": null,
+  "packagerPid": null,
   "webpackServerPort": null
 }
