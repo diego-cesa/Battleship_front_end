@@ -14,11 +14,13 @@ const Menu = (props) => (
                 onPress={()=>{
                     props.resetGame();
                     props.navigation.closeDrawer();
+                    props.navigation.navigate('Home');
                 }} />
             <Button title='New Game' 
                 onPress={()=>{
-                    props.createNewGame(newGame());
+                    props.getRandGame();
                     props.navigation.closeDrawer();
+                    props.navigation.navigate('Home');
                 }} />
             <DrawerItems {...props} />
         </SafeAreaView>
@@ -36,8 +38,8 @@ const mapDispatchToProps = (dispatch) => {
         resetGame: ()=> {
             dispatch(action.resetGame());
         },
-        createNewGame: (game) => {
-            dispatch(action.createNewGame(game));
+        getRandGame: () => {
+            dispatch(action.getRandGame());
         }
     }
 

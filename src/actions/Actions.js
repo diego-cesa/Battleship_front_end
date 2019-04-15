@@ -41,7 +41,7 @@ export function resetGame(){
     };
 }
 
-export function createNewGame(game){
+export function newGame(game){
     return(dispatch)=>{
         dispatch({
             type: NEW_GAME,
@@ -51,7 +51,6 @@ export function createNewGame(game){
 
 }
 
-
 // API REQUESTS
 export function getRandGame(){
     console.log("GET_RAND_GAME");
@@ -59,13 +58,63 @@ export function getRandGame(){
     return function(dispatch) {
         axios.get('http://192.168.0.12:8080/randGame')
         .then(function (response){
-            console.log(response.data);
-            dispatch(createNewGame(response.data.game));
+            dispatch(newGame(response.data.game));
         })
         .catch(function (error){
             console.log(error);
         })
     }
+}
 
-    
+export function getBaseGame(){
+    console.log("GET_BASE_GAME");
+
+    return function(dispatch) {
+        axios.get('http://192.168.0.12:8080/baseGame')
+        .then(function (response){
+            dispatch(updateKey('gameBaseDefault', response.data.baseGame));
+            dispatch(updateKey('newGameBase', response.data.baseGame));
+        })
+        .catch(function (error){
+            console.log(error);
+        })
+    }
+}
+
+export function getPlayer(playerId){
+    console.log("GET_PLAYER");
+
+    return function(dispatch) {
+        axios.get('http://192.168.0.12:8080/getPlayer/' + playerId)
+        .then(function (response) {
+            if(response.data.errorCode == 0){
+                dispatch(updateKey('playerGames', response.data.games));
+            }
+        })
+        .catch(function (error) {
+            console.log(error);
+        })
+    }
+}
+
+export function createGame(playerId, gameArray){
+    console.log("CREATE_GAME");
+
+    return function(dispatch){
+        axios.post('http://192.168.0.12:8080/createGame',
+        {
+            playerId: playerId,
+            gamePosition: gameArray
+        })
+        .then(function (response){
+            if(response.data.errorCode == 0){
+                dispatch(newGame(gameArray));
+                dispatch(getPlayer(playerId));
+            }
+
+        })
+        .catch(function (error){
+            console.log(error);
+        })
+    }
 }

@@ -6,6 +6,7 @@ import AppNavigator from './src/navigation';
 const store = configureStore();
 
 export default class App extends React.Component {
+
   render() {
     return (
     <Provider store={store}>

@@ -2,14 +2,19 @@ import update from 'immutability-helper'
 import { UPDATE_KEY, GAME_ACTION, INCREMENT, RESET_GAME, NEW_GAME } from '../actions/Actions';
 
 export const initialState = {
-   currentGame: null,
-   originalGame: null,
+   playerId: null,
+   playerGames: [],
+
+   gameArray: [],
+   originalGame: [],
    shotsMissed: 0,
    shotsSuccess: 0,
 
    refreshGrid: false,
-
+   gameBaseDefault: null,
    newGameBase: null,
+
+   newGameArray: [],
    newGameActiveShip: null,
    newGameSelectedPosition: null,
    newGameHighlightedPositions: [],
@@ -28,7 +33,7 @@ const rootReducer = (state = initialState, action) => {
            break;
         case GAME_ACTION:
            return update(state, {
-               currentGame:{
+                newGameBase:{
                    [action.index]: {
                        clicked: {$set: true}
                    }
@@ -40,7 +45,8 @@ const rootReducer = (state = initialState, action) => {
             break;
         case RESET_GAME:
             changedState = {
-                currentGame: state.originalGame,
+                gameArray: state.originalGame,
+                newGameBase: state.gameBaseDefault,
                 shotsMissed: 0,
                 shotsSuccess: 0
             }
@@ -48,10 +54,12 @@ const rootReducer = (state = initialState, action) => {
             break;
         case NEW_GAME: 
             changedState = {
-                currentGame: action.newGame,
+                gameArray: action.newGame,
                 originalGame: action.newGame,
+                newGameBase: state.gameBaseDefault,
                 shotsMissed: 0,
-                shotsSuccess: 0
+                shotsSuccess: 0,
+                refreshGrid: !state.refreshGrid
             }
             newState = Object.assign({}, state, changedState);
             break;

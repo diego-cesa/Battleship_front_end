@@ -1,6 +1,8 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import constants from './constants';
 
+let SCREEN_WIDTH = Dimensions.get('window').width; 
+
 export default StyleSheet.create({
     homeContainer: {
       flex: 1,
@@ -13,7 +15,7 @@ export default StyleSheet.create({
     gridContainer: {
       flex: 1,
       marginVertical: 20,
-      width: Dimensions.get('window').width
+      width: SCREEN_WIDTH
     },
     gridItem: {
       backgroundColor: '#40d0ed',
@@ -21,7 +23,7 @@ export default StyleSheet.create({
       justifyContent: 'center',
       flex: 1,
       margin: 1,
-      height: Dimensions.get('window').width / constants.NUM_COMLUMNS, // approximate a square
+      height: SCREEN_WIDTH / constants.NUM_COMLUMNS, // approximate a square
     },
     gridItemText: {
       color: '#fff',
@@ -30,7 +32,17 @@ export default StyleSheet.create({
     // Menu Icon
     menuIcon: {
       paddingLeft: 10
-    }
+    },
 
+    // Game List
+    gameListItem: {
+      backgroundColor: '#40d0ed',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flex: 1,
+      margin: 1,
+      height: 50,
+      width: SCREEN_WIDTH
+    },
 
   });

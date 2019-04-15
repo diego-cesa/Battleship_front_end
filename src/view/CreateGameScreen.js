@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import { View, Button } from 'react-native';
+import { View, Button, Text } from 'react-native';
 import { connect } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 
-import NewGameGrid from '../components/NewGameGrid';
+import { newGamePositionHighlight, insertPositionsFromDirection } from '../res/newGame';
 import styles from '../res/styles';
 import * as action from '../actions/Actions';
 import constants from '../res/constants';
-import { newGameArray } from '../res/newGame';
+
+import Grid from '../components/Grid';
 
 class CreateGameScreen extends Component {
   static navigationOptions = ({ navigation }) => ({
@@ -41,31 +42,96 @@ class CreateGameScreen extends Component {
           return true;
         }
       }
-
       return false;
     }
   }
 
   onClear(){
     let gameShips = this.newGameShips();
-    this.props.updateKey('newGameBase', newGameArray());
     this.props.updateKey('newGameCountShips', gameShips);
+    this.props.updateKey('newGameArray', []);
 
     if(gameShips.length == 0){
       alert.alert('Error', 'No ships configuration found!');
     }
     else{
       this.props.updateKey('newGameActiveShip', gameShips[0].shipSize);
-
       this.props.updateKey('refreshGrid', !this.props.refreshGrid);
     }
   }
 
   onDone(){
-    this.props.updateKey('currentGame', this.props.newGameBase);
-    this.props.updateKey('originalGame', this.props.newGameBase);
+    this.props.createGame(this.props.playerId, this.props.newGameArray);
     this.props.navigation.navigate('Home');
     this.onClear();
+  }
+
+
+  celClick = (index) =>{
+
+    if(this.props.newGameHighlightedPositions != null && 
+        this.props.newGameHighlightedPositions.includes(index)){
+
+            let gameUpdated = insertPositionsFromDirection(this.props.newGameSelectedPosition, 
+                index, this.props.newGameArray, this.props.newGameActiveShip);
+
+            let tempCount = this.props.newGameCountShips;
+            for(let i = 0; i < tempCount.length; i++){
+                if(tempCount[i].shipSize == this.props.newGameActiveShip){
+                    tempCount[i].count++;
+
+                    if(tempCount[i].count == constants.SHIP_NUMBER[i].number){
+                        if(i+1 < tempCount.length){
+                            this.props.updateKey('newGameActiveShip', tempCount[i+1].shipSize);
+                        }
+                        else{
+                            this.props.updateKey('newGameActiveShip', null);
+                        }
+                    }
+                    break;
+                }
+            }
+
+            this.props.updateKey('newGameArray', gameUpdated);
+            this.props.updateKey('newGameCountShips', tempCount);
+            this.props.updateKey('newGameSelectedPosition', null);
+            this.props.updateKey('newGameHighlightedPositions', null);
+            this.props.updateKey('refreshGrid', !this.props.refreshGrid);
+    }
+    else{
+        this.props.updateKey('newGameSelectedPosition', index);
+        let availablePositions = newGamePositionHighlight(index, this.props.newGameArray, this.props.newGameActiveShip);
+
+        if(availablePositions.length > 0){
+            this.props.updateKey('newGameHighlightedPositions', availablePositions);
+        }
+        else{
+            this.props.updateKey('newGameSelectedPosition', null);
+            this.props.updateKey('newGameHighlightedPositions', null);
+        }
+        this.props.updateKey('refreshGrid', !this.props.refreshGrid);
+    }
+  }
+
+  itemRender = (item, index) => {
+    let celStyle = styles.gridItem;
+
+
+    if(index == this.props.newGameSelectedPosition || 
+        (this.props.newGameArray.includes(index))){
+        celStyle = [styles.gridItem, {backgroundColor: '#325359'}]
+    }
+    else if(this.props.newGameHighlightedPositions != null && 
+            this.props.newGameHighlightedPositions.indexOf(index) != -1){
+        celStyle = [styles.gridItem, {backgroundColor: '#69939b'}]
+    }
+
+    return {celStyle: celStyle}
+
+  }
+
+  celDisabled = (item, index) => {
+    return this.props.newGameArray.includes(index);
   }
 
   render() {
@@ -82,26 +148,31 @@ class CreateGameScreen extends Component {
     }
     return (
       <View style={styles.homeContainer}>
-        <NewGameGrid />
+        <Grid 
+          game={this.props.newGameArray} 
+          onCelClick={this.celClick} 
+          itemRender={this.itemRender}
+          celDisabled={this.celDisabled}
+        />
 
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
 
           {constants.SHIP_NUMBER.map((item, index)=>{
-
             let count = 0;
             if(this.props.newGameCountShips != null){
               count = this.props.newGameCountShips[index].count;
             }
 
-            return(<Button key={index + ''} 
-                      disabled={(this.props.newGameActiveShip == null || 
-                                this.props.newGameActiveShip == item.shipSize) &&
-                                count < item.number ? false : true}
-                      title={'size ' + item.shipSize +': ' +  count + '/' + item.number} 
-                      onPress={()=>{this.props.updateKey('newGameActiveShip', item.shipSize)}} style={{flex: 1}}/>)
-
-
-          })}
+            let labelStyle = (this.props.newGameActiveShip == null || 
+              this.props.newGameActiveShip == item.shipSize) &&
+              count < item.number ? {flex:1, backgroundColor:"#3872d1"} : {flex:1, backgroundColor:"#d6d6d6"}
+            
+            return(<View key={""+index} style={labelStyle}>
+                    <Text>{'size ' + item.shipSize +': ' +  count + '/' + item.number}</Text>
+                  </View>
+            )
+            })
+          }
         </View>
 
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 3}}>
@@ -118,10 +189,15 @@ class CreateGameScreen extends Component {
 
 function mapStateToProps(state){
   return {
+    playerId: state.playerId,
+    newGameArray: state.newGameArray,
+    refreshGrid: state.refreshGrid,
+    gameBaseDefault: state.gameBaseDefault,
+
     newGameActiveShip: state.newGameActiveShip,
     newGameCountShips: state.newGameCountShips,
-    newGameBase: state.newGameBase,
-    refreshGrid: state.refreshGrid
+    newGameHighlightedPositions: state.newGameHighlightedPositions,
+    newGameSelectedPosition: state.newGameSelectedPosition
   }
 }
 
@@ -130,6 +206,9 @@ const mapDispatchToProps = (dispatch) => {
     updateKey: (key, value) => {
       dispatch(action.updateKey(key, value));
     },
+    createGame: (playerId, game) => {
+      dispatch(action.createGame(playerId, game));
+    }
   }
 }
 

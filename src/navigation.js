@@ -1,6 +1,8 @@
 import { createStackNavigator, createAppContainer, createDrawerNavigator } from 'react-navigation';
 import HomeScreen from './view/HomeScreen';
 import CreateGameScreen from './view/CreateGameScreen';
+import MyGamesScreen from './view/MyGamesScreen';
+import MyGameScreen from './view/MyGameScreen';
 
 import Menu from './components/Menu';
 
@@ -16,6 +18,13 @@ const CreateNewGameStack = createStackNavigator(
     },
 );
 
+const MyGamesStack = createStackNavigator(
+    {
+        MyGames: MyGamesScreen,
+        MyGame: MyGameScreen
+    }
+)
+
 const MenuNavigator = createDrawerNavigator(
     {
         Home: {
@@ -28,6 +37,12 @@ const MenuNavigator = createDrawerNavigator(
             screen: CreateNewGameStack,
             navigationOptions: {
                 drawerLabel: 'Create New Game'
+            }
+        },
+        MyGames: {
+            screen: MyGamesStack,
+            navigationOptions: {
+                drawerLabel: 'My Games'
             }
         },
     },

@@ -42,7 +42,8 @@ export function insertPositionsFromDirection(position, directionSelected, gameAr
             }
         }
     }
-    return insertShip(gameArray, tempIndex);
+
+    return gameArray.concat(tempIndex);
 }
 
 export function newGamePositionHighlight(position, gameArray, shipSize){
@@ -50,6 +51,7 @@ export function newGamePositionHighlight(position, gameArray, shipSize){
 
     let availablePositions = [];
     for(direction of directions){
+
         let available = obstructionCheck(direction, position, gameArray, shipSize);
         if(available != null){
             available.shift();
@@ -67,7 +69,7 @@ function obstructionCheck(dirSelected, position, gameArray, shipSize){
     switch(dirSelected){
         case "up":
             for(let i = 1; i < shipSize; i++){
-                if(gameArray[position - (10*i)].ship == false){
+                if(!gameArray.includes(position - (10*i))){
                     tempIndex.push(position - (10*i));
                 }
                 else{
@@ -77,7 +79,7 @@ function obstructionCheck(dirSelected, position, gameArray, shipSize){
             return tempIndex;
         case "down": 
             for(let i = 1; i < shipSize; i++){
-                if(gameArray[position + (10*i)].ship == false){
+                if(!gameArray.includes(position + (10*i))){
                     tempIndex.push(position + (10*i));
                 }
                 else{
@@ -87,7 +89,7 @@ function obstructionCheck(dirSelected, position, gameArray, shipSize){
             return tempIndex;
         case "left": 
             for(let i = position-1; position-i < shipSize; i--){
-                if(gameArray[i].ship == false){
+                if(!gameArray.includes(i)){
                     tempIndex.push(i);
                 }
                 else{
@@ -97,7 +99,7 @@ function obstructionCheck(dirSelected, position, gameArray, shipSize){
             return tempIndex;
         case "right": 
             for(let i = position+1; i-position < shipSize; i++){
-                if(gameArray[i].ship == false){
+                if(!gameArray.includes(i)){
                     tempIndex.push(i);
                 }
                 else{
@@ -107,14 +109,6 @@ function obstructionCheck(dirSelected, position, gameArray, shipSize){
             return tempIndex;
         default: return null;    
     }
-}
-
-function insertShip(newGame, positions){
-    for(let i = 0; i < positions.length; i++){
-        newGame[positions[i]].ship = true;
-    }
-
-    return newGame;
 }
 
 function possibleDirections(index, shipSize){
@@ -134,51 +128,3 @@ function possibleDirections(index, shipSize){
 
     return directions;
 }
-
-function newGame(){
-    let newGame = newGameArray();
-
-    const shipCount = constants.SHIP_NUMBER;
-
-    shipCount.forEach(function(shipInfo){
-        let countShip = 0; 
-        while(countShip < shipInfo.number){
-            // get random index
-            let rand = Math.floor(Math.random() * 100);
-
-            // check if position is available
-            if(newGame[rand].ship == false){
-
-                // get possible directions
-                let directions = possibleDirections(rand, shipInfo.shipSize);
-
-                //new direction 
-                let newDir = true;
-                do{
-                    if(directions.length > 0){
-                        // get random direction
-                        let indexSelected = Math.floor(Math.random() * directions.length);
-                        // check for obstructions
-                        let insertArray = obstructionCheck(directions[indexSelected], rand, newGame, shipInfo.shipSize);
-
-                        // insert ship
-                        if(insertArray != null){
-                            newGame = insertShip(newGame, insertArray);
-                            countShip++;
-                            newDir = false;
-                        }
-                        else{
-                            directions.splice(indexSelected, 1);
-                        }
-                    }
-                    else{
-                        newDir = false;
-                    }
-                }while(newDir == true);
-            }
-        }
-    });
-    return newGame;
-}
-
-export default newGame;
